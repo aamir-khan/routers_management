@@ -25,7 +25,11 @@ SECRET_KEY = 'azg88v%36ytieh!2o_%t%q1i)%nt6wmb73*dpf@wlog(46+3md'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '172.20.0.1', '172.20.0.1:8088', '172.16.14.83']
+ALLOWED_HOSTS = ['127.0.0.1', '172.20.0.1', '172.20.0.1:8088',
+                 '172.16.14.83', '127.0.0.1:8081', '0.0.0.0',
+                 'aamirkhan206.pythonanywhere.com', 'localhost:8081',
+                 'http://localhost:8081', 'http://127.0.0.1:8081/', '127.0.0.1:8081'
+                 ]
 
 
 # Application definition
@@ -39,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'routers.apps.RoutersConfig',
     'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -49,7 +54,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'routers_management.urls'
 
