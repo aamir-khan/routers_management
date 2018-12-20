@@ -24,8 +24,10 @@ class Neighbour(models.Model):
     from_router = models.ForeignKey('Router', on_delete=models.CASCADE, related_name='connected_from')
     to_router = models.ForeignKey('Router', on_delete=models.CASCADE, related_name='connected_to')
     local_intf = models.CharField(max_length=100)
-    port = models.OneToOneField('Port', on_delete=models.PROTECT, null=True, blank=True,
-                                related_name='connect_neighbour')
+    local_interface = models.OneToOneField(
+        'InterfacePort', on_delete=models.CASCADE, related_name='from_interface')
+    external_interface = models.OneToOneField(
+        'InterfacePort', on_delete=models.CASCADE, related_name='external_interface')
     hold_time = models.PositiveIntegerField()
     capability = MultiSelectField(choices=NeighbourCapability.model_choices(), null=False, blank=False)
     external_port_id = models.CharField(max_length=100)
@@ -36,7 +38,8 @@ class Neighbour(models.Model):
 
 class Router(models.Model):
     name = models.CharField(max_length=255, unique=True, null=False, blank=False)
-    neighbours = models.ManyToManyField('self', related_name='neighbours', symmetrical=True, blank=True)
+    neighbours_router = models.ManyToManyField(
+        'self', through='Neighbour', related_name='neighbours', symmetrical=False, blank=True)
 
     def __str__(self):
         return u"{}".format(self.name)
@@ -44,28 +47,25 @@ class Router(models.Model):
 
 class Slot(models.Model):
     router = models.ForeignKey(Router, on_delete=models.CASCADE, related_name='slots')
-    # It shows the slot number on the router where it is placed on the router. e.g in node name -> 0/0/NPU0
-    # 0(vertical row number)/0(slot number)/NPU0(Name of the port and last 0 shows the number of the port inside
-    # the given slot)
     slot_number = models.PositiveIntegerField()
 
     class Meta:
         unique_together = ('router', 'slot_number')
 
     def __str__(self):
-        return "{}({})".format(self.slot_number, self.router)
-
-
-class CardAdminState(Enum):
-    UP = 'UP'
-    DOWN = 'DOWN'
-
-    @classmethod
-    def model_choices(cls):
-        return tuple([(attr.value, attr.name) for attr in cls])
+        return "{}".format(self.slot_number)
 
 
 class Card(models.Model):
+
+    class CardAdminState(Enum):
+        UP = 'UP'
+        DOWN = 'DOWN'
+
+        @classmethod
+        def model_choices(cls):
+            return tuple([(attr.value, attr.name) for attr in cls])
+
     slot = models.OneToOneField(Slot, on_delete=models.CASCADE, related_name='card')
     # If the slots are placed on each other(multi-chassis system) it will show the vertical number.
     # In our case(single-chassis system) it should be always 0.
@@ -82,29 +82,11 @@ class Card(models.Model):
     def __str__(self):
         return "{}".format(self.node_type)
 
-
-class Port(models.Model):
-    card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name='ports')
-    # 0/0/NPU0 it is the last integer like 0 in this case.
-    port_number_inside_slot = models.PositiveIntegerField()
-    # From 0/0/NPU0 it is NPU0
-    node_name = models.CharField(max_length=255)
-    node_type = models.CharField(max_length=255, default='Slice', blank=True)
-    node_state = models.CharField(max_length=255)
-    admin_state = models.CharField(max_length=100, choices=CardAdminState.model_choices(), blank=True, default='')
-
     class Meta:
-        unique_together = ('card', 'port_number_inside_slot')
-
-    @property
-    def port_name(self):
-        return "{}".format(self.node_name)
-
-    def __str__(self):
-        return self.port_name
+        ordering = ('slot__slot_number', )
 
 
-class Interface(models.Model):
+class InterfacePort(models.Model):
     class StatusChoices(Enum):
         UP = 'UP'
         DOWN = 'DOWN'
@@ -122,9 +104,14 @@ class Interface(models.Model):
         @classmethod
         def choices(cls):
             return tuple([(attr.value, attr.name) for attr in cls])
-
+    card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name='interfaces')
+    # HundredGigE0/0/0/0 it is the last integer like 0 in this case.
+    port_number_inside_card = models.PositiveIntegerField()
+    # Something like this HundredGigE0/0/0/0
     name = models.CharField(max_length=255)
-    port = models.OneToOneField(Port, on_delete=models.CASCADE, related_name='interface')
     ip_address = models.GenericIPAddressField(null=True, default='unassigned')
     status = models.CharField(max_length=100, choices=StatusChoices.choices())
     protocol = models.CharField(max_length=100, choices=ProtocolChoices.choices())
+
+    def __str__(self):
+        return "{}({})".format(self.name, self.card)

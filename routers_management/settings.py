@@ -25,7 +25,7 @@ SECRET_KEY = 'azg88v%36ytieh!2o_%t%q1i)%nt6wmb73*dpf@wlog(46+3md'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '172.20.0.1', '172.20.0.1:8088', '172.16.14.83']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'routers.apps.RoutersConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

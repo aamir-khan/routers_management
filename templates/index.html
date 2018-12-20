@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>Router management</title>
+</head>
+<body>
+    <div class="content">
+        <div id="app">
+            <ol>
+                <router-item
+                        v-for="router in routers"
+                        v-bind:router="router"
+                        v-bind:key="router.id"
+                ></router-item>
+            </ol>
+        </div>
+    </div>
+
+<script>
+
+    Vue.component('router-item', {
+        delimiters: ['[[', ']]'],
+        props: ['router'],
+        template: '<li>[[ router.name ]]</li>'
+    });
+
+    var app = new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#app',
+        data: {
+            routers: []
+        },
+        created() {
+            fetch('http://127.0.0.1:8000/routers/')
+                .then(response => response.json())
+                .then(json => {
+                    this.routers = json
+                })
+        }
+    });
+
+
+</script>
+
+</body>
+</html>
