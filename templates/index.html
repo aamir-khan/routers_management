@@ -3,46 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.17.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.17.0/vis.min.css" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <title>Router management</title>
 </head>
 <body>
     <div class="content">
         <div id="app">
-            <ol>
-                <router-item
-                        v-for="router in routers"
-                        v-bind:router="router"
-                        v-bind:key="router.id"
-                ></router-item>
-            </ol>
+            <ovs-network></ovs-network>
         </div>
+
+        <template id="mytmp">
+            <div>
+                <div id="mynetwork" style="width: 1500px; height: 800px; border: 1px solid lightgray;"></div>
+            </div>
+        </template>
     </div>
 
 <script>
-
-    Vue.component('router-item', {
-        delimiters: ['[[', ']]'],
-        props: ['router'],
-        template: '<li>[[ router.name ]]</li>'
-    });
-
-    var app = new Vue({
-        delimiters: ['[[', ']]'],
-        el: '#app',
-        data: {
-            routers: []
-        },
-        created() {
-            fetch('http://127.0.0.1:8000/routers/')
-                .then(response => response.json())
-                .then(json => {
-                    this.routers = json
-                })
+Vue.component("ovs-network", {
+    template: "#mytmp",
+    data() {
+        return {
+            edges: [
+                {to: 8, from: 1}, {to: 4, from: 1}, {to: 3, from: 1}, {to: 10, from: 1}, {to: 2, from: 1},
+                {to: 8, from: 1}, {to: 5, from: 1}, {to: 1, from: 2}, {to: 1, from: 3}, {to: 1, from: 4},
+                {to: 1, from: 5}, {to: 1, from: 8}, {to: 1, from: 8}, {to: 1, from: 10}
+                ],
+            nodes: [
+                {id: 1, label: 'CoreNCS-Abha-701-1'}, {id: 2, label: 'CoreNCS-Maa-108-1'},
+                {id: 3, label: 'CoreNCS-Row-202-1'}, {id: 4, label: 'CoreNCS-Kho-304-1'},
+                {id: 5, label: 'CoreNCS-Man-224-1'}, {id: 8, label: 'CoreNCS-Bah-712-1'},
+                {id: 10, label: 'CoreNCS-Muj-214-1'}
+                ],
+            options: {
+                manipulation: {
+                    enabled: true,
+                    initiallyActive: true,
+                    addEdge: function(edgeData, callback) {
+                        callback(edgeData);
+                    }
+                },
+                nodes: {
+                    physics: false
+                }
+            },
+            container: '',
+            network: null
         }
-    });
+    },
 
+    computed: {
+        graph_data() {
+            return {
+                nodes: this.nodes,
+                edges: this.edges
+            }
+        }
+    },
+
+    mounted() {
+        axios.get("/routers/topology").then(function (response) {
+            this.nodes = response.data.nodes;
+            this.edges = response.data.edges;
+            console.log(this.nodes);
+            console.log(this.edges);
+        });
+        this.container = document.getElementById("mynetwork");
+        this.network = new vis.Network(this.container, this.graph_data, this.options);
+    }
+});
+
+
+const app = new Vue({
+    el: "#app"
+});
 
 </script>
-
 </body>
 </html>
