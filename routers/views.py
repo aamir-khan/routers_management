@@ -9,17 +9,20 @@ from routers.serializers import RouterSerializer, CardSerializer, RouterDetailSe
 
 
 class RouterListView(ListAPIView):
+    """Returns the list of routers."""
     serializer_class = RouterSerializer
     queryset = Router.objects.all()
 
 
 class RouterDetailView(RetrieveAPIView):
+    """Returns the detail of given router."""
     # permission_classes = (IsAuthenticated, )
     serializer_class = RouterDetailSerializer
     queryset = Router.objects.all().prefetch_related('neighbours_router')
 
 
 class RouterCardsListView(ListAPIView):
+    """Returns all cards installed in the given routers."""
     serializer_class = CardSerializer
     queryset = Card.objects.all()
 
@@ -27,16 +30,8 @@ class RouterCardsListView(ListAPIView):
         return super().get_queryset().filter(slot__router__pk=self.kwargs['router_id'])
 
 
-class RouterNeighboursListView(ListAPIView):
-    serializer_class = NeighbourSerializer
-    queryset = Neighbour.objects.all()
-
-    def get_queryset(self):
-        queryset = super().get_queryset().filter(from_router__id=self.kwargs['pk']).select_related('to_router')
-        return queryset
-
-
 class TopologyView(APIView):
+    """Returns the routers' topology. If the router_id is given it will give only that router's connectivity."""
 
     def get(self, request, router_id=None, format=None):
         connected_routers = set()

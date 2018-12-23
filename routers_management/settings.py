@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'routers.apps.RoutersConfig',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [

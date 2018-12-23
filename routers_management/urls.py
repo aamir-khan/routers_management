@@ -16,11 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_swagger.views import get_swagger_view
 
-from routers_management.views import IndexView
+schema_view = get_swagger_view(title='Routers management APIs')
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='index_view'),
+    path('', schema_view),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('routers/', include('routers.urls')),
