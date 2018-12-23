@@ -1,3 +1,4 @@
+from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
 from routers.models import Router, Neighbour, Card, Slot, InterfacePort
@@ -25,10 +26,17 @@ class RouterSerializer(ModelSerializer):
 
 
 class InterfacePortSerializer(ModelSerializer):
+    connected_router = SerializerMethodField()
 
     class Meta:
         model = InterfacePort
         fields = '__all__'
+
+    # noinspection PyMethodMayBeStatic
+    def get_connected_router(self, obj):
+        neighbour = Neighbour.objects.filter(local_interface=obj).first()
+
+        return neighbour.to_router.pk if neighbour else ""
 
 
 class CardDetailSerializer(ModelSerializer):
