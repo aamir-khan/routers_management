@@ -35,6 +35,15 @@ class TopologyView(APIView):
     """Returns the routers' topology. If the router_id is given it will give only that router's connectivity."""
     permission_classes = (IsAuthenticated,)
 
+    @staticmethod
+    def _remove_duplicate_edges(edges):
+        unique_edges = set()
+        for edge in edges:
+            if (edge["to"], edge["from"]) in unique_edges:
+                continue
+            unique_edges.add((edge["from"], edge["to"]))
+        return [{"from": edge[0], "to": edge[1]} for edge in unique_edges]
+
     def get(self, request, router_id=None, format=None):
         connected_routers = set()
         routers = Router.objects.all().values('id', label=F('name'))
@@ -52,5 +61,6 @@ class TopologyView(APIView):
             routers = [router for router in routers if router['id'] in connected_routers]
         else:
             edges = [{'from': edge['from_router'], 'to': edge['to_router']} for edge in neighbours]
+        edges = self._remove_duplicate_edges(edges)
         data = {'nodes': list(routers), 'edges': edges}
         return Response(data)
