@@ -29,11 +29,10 @@ SECRET_KEY = 'azg88v%36ytieh!2o_%t%q1i)%nt6wmb73*dpf@wlog(46+3md'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '172.20.0.1', '172.20.0.1:8088',
-                 '172.16.14.83', '127.0.0.1:8081', '0.0.0.0',
-                 'aamirkhan206.pythonanywhere.com', 'localhost:8081',
-                 'http://localhost:8081', 'http://127.0.0.1:8081/', '127.0.0.1:8081'
-                 ]
+ALLOWED_HOSTS = [
+    'http://localhost:8081', 'http://127.0.0.1:8081/', '127.0.0.1:8081', 'https://routers-management.herokuapp.com/',
+    'https://routers-management.herokuapp.com'
+]
 
 
 # Application definition
