@@ -1,14 +1,23 @@
 import os
 from os import listdir
 from os.path import isfile, join
+from pathlib import Path
 
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 
 from routers.models import Router, Slot, Card, Neighbour, InterfacePort
 
 
 class Command(BaseCommand):
     help = 'Loads the routers data'
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--routers_data_dir',
+            type=str,
+            required=True,
+            help='Absolute path to the folder containing the data files'
+        )
 
     VALID_CARDS = ['0/0', '0/1', '0/2', '0/3', '0/4', '0/5', '0/6', '0/7']
     VALID_INTERFACES = ['HundredGigE', 'TenGigE']
@@ -149,7 +158,15 @@ class Command(BaseCommand):
                 )
 
     def handle(self, *args, **kwargs):
-        routers_data_dir = os.path.abspath(os.path.join(__file__, '../../../../../routers_files'))
+        routers_data_dir = kwargs.get('routers_data_dir')
+        if not routers_data_dir:
+            raise CommandError("Please provide the absolute path to the folder that contains the files.")
+        data_folder = Path(routers_data_dir)
+        if not data_folder.exists():
+            raise CommandError("The path doesn't exist on the system.")
+        if not data_folder.is_dir():
+            raise CommandError("The path is not a directory.")
+
         router_files_names = [f for f in listdir(routers_data_dir) if isfile(join(routers_data_dir, f))]
         # Add the routers
         self.add_routers(router_files_names)
