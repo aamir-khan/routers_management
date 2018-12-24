@@ -10,7 +10,6 @@ from routers.serializers import RouterSerializer, CardSerializer, RouterDetailSe
 
 class RouterListView(ListAPIView):
     """Returns the list of routers."""
-    permission_classes = (IsAuthenticated,)
     serializer_class = RouterSerializer
     queryset = Router.objects.all()
 
