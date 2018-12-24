@@ -29,10 +29,7 @@ SECRET_KEY = 'azg88v%36ytieh!2o_%t%q1i)%nt6wmb73*dpf@wlog(46+3md'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'http://localhost:8081', 'http://127.0.0.1:8081/', '127.0.0.1:8081', 'https://routers-management.herokuapp.com/',
-    'https://routers-management.herokuapp.com', '0.0.0.0:8000', 'http://0.0.0.0:8000', '0.0.0.0'
-]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
